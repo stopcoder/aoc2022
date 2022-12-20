@@ -84,29 +84,58 @@ async function processLineByLine() {
 		};
 	}
 
+	const es = {};
+
+	Object.keys(vs).forEach((vName) => {
+		const v = vs[vName];
+
+		if (v.name !== "AA" && v.rate === 0) {
+			return;
+		}
+
+		es[v.name] = {};
+
+		const visited = new Set();
+		visited.add(v.name);
+		const queue = [[v.name, 0]];
+		
+
+		while (queue.length !== 0) {
+			const cur = queue.shift();
+
+			vs[cur[0]].nbs.forEach((nb) => {
+				if (visited.has(nb)) {
+					return;
+				}
+				visited.add(nb);
+				queue.push([nb, cur[1] + 1]);
+				if (vs[nb].rate > 0) {
+					es[v.name][nb] = cur[1] + 1;
+				}
+			});
+		}
+	});
+
 	const solve = function (c, time, opened, elephant) {
 		console.log(`${c} ${time} ${opened}`);
-		if (time === 0) {
-			if (!elephant) {
-				return this("AA", 26, opened, true);
-			} else {
-				return 0;
-			}
-		}
-
-		const cur = vs[c];
-
 		let value = 0;
-
-		if (opened.indexOf(c) === -1 && cur.rate > 0) {
-			const openedCopy = opened.slice();
-			openedCopy.push(c);
-			openedCopy.sort();
-			value = cur.rate * (time - 1) + this(c, time - 1, openedCopy, elephant);
-		}
-
-		cur.nbs.forEach((nb) => {
-			value = Math.max(value, this(nb, time - 1, opened, elephant))
+		Object.keys(es[c]).forEach((nb) => {
+			if (opened.indexOf(nb) !== -1) {
+				return;
+			}
+			let remain = time - es[c][nb] - 1;
+			if (remain <= 0) {
+				if (!elephant) {
+					value = Math.max(value, this("AA", 26, opened, true));
+				} else {
+					return;
+				}
+			} else {
+				const openedCopy = opened.slice();
+				openedCopy.push(nb);
+				openedCopy.sort();
+				value = Math.max(value, this(nb, remain, openedCopy, elephant) + vs[nb].rate * remain);
+			}
 		});
 
 		return value;
