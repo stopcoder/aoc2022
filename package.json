@@ -21,6 +21,7 @@
     "dijkstrajs": "^1.0.2",
     "functools": "^3.4.0",
     "js-sdsl": "^4.2.0",
+    "lcm": "^0.0.3",
     "object-hash": "^3.0.0"
   }
 }
