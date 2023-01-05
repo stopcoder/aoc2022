@@ -16,7 +16,6 @@ async function processLineByLine() {
 		crlfDelay: Infinity
 	});
 
-	const lefts = [];
 	const jungle = [];
 	const insts = [];
 
@@ -24,20 +23,19 @@ async function processLineByLine() {
 	const dirs = [[0, 1], [1, 0], [0, -1], [-1, 0]];
 	let finished = false;
 
+	let maxLength = 0;
+
 	for await (const line of rl) {
 		const parts = line.split("");
+
 		if (!finished) {
 			if (!line) {
 				finished = true;
 				continue;
 			}
+
+			maxLength = Math.max(maxLength, parts.length);
 			jungle.push(parts);
-
-			const left = parts.findIndex((c) => {
-				return c !== " ";
-			});
-
-			lefts.push(left);
 		} else {
 			let dir = 0;
 			let sn = "";
@@ -63,47 +61,29 @@ async function processLineByLine() {
 		}
 	}
 
-	console.log(lefts);
-	console.log(insts);
+	jungle.forEach((line) => {
+		while (line.length < maxLength) {
+			line.push(" ");
+		}
+	});
 
 	let cx = 0, 
-		cy = lefts[0];
+		cy = jungle[0].indexOf(".");
 
 	for (let i = 0; i < insts.length; i++) {
 		const inst = insts[i];
 		const dir = inst[0];
 		const step = inst[1];
-		let nx, ny;
+		let nx = cx, ny = cy;
+		let dx = dirs[dir][0];
+		let dy = dirs[dir][1]
+		
 
 		for (let j = 0; j < step; j++) {
-			nx = cx + dirs[dir][0];
-			ny = cy + dirs[dir][1];
-
-			if (nx !== cx) {
-				if (dirs[dir][0] === 1) {
-					if (nx === jungle.length || jungle[nx][ny] === " ") {
-						let tx = 0;
-						while (jungle[tx][ny] === " " || jungle[tx][ny] === undefined) {
-							tx++;
-						}
-						nx = tx;
-					}
-				} else {
-					if (nx < 0 || jungle[nx][ny] === " ") {
-						let tx = jungle.length - 1;
-						while (jungle[tx][ny] === " " || jungle[tx][ny] === undefined) {
-							tx--;
-						}
-						nx = tx;
-					}
-				}
-			} else {
-				if (ny === jungle[nx].length) {
-					ny = lefts[nx];
-				} else if (ny < lefts[nx]) {
-					ny = jungle[nx].length - 1;
-				}
-			}
+			do {
+				nx = ((nx + dx) % jungle.length + jungle.length) % jungle.length;
+				ny = ((ny + dy) % jungle[nx].length + jungle[nx].length) % jungle[nx].length;
+			} while (jungle[nx][ny] === " ");
 
 			if (jungle[nx][ny] === ".") {
 				cx = nx;
