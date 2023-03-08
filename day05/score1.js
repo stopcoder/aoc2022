@@ -1,5 +1,5 @@
-const fs = require('fs');
-const readline = require('readline');
+import * as fs from 'fs';
+import * as readline from 'readline';
 
 async function processLineByLine() {
 	const fileStream = fs.createReadStream('input');
@@ -49,11 +49,15 @@ async function processLineByLine() {
 	}
 
 	steps.forEach((ins) => {
-		const temp = [];
-		for (let i = 0; i < ins[0]; i++) {
-			temp.unshift(stacks[ins[1] - 1].pop());
+		const count = ins[0];
+		const from = ins[1] - 1;
+		const fromLength = stacks[from].length;
+		const to = ins[2] - 1;
+		for (let i = count; i > 0; i--) {
+			stacks[to].push(stacks[from][fromLength - i]);
 		}
-		stacks[ins[2] - 1] = stacks[ins[2] - 1].concat(temp);
+
+		stacks[from].splice(fromLength - count, count);
 	});
 
 	const result = stacks.reduce((acc, stack) => {

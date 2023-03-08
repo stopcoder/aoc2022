@@ -1,5 +1,5 @@
-const fs = require('fs');
-const readline = require('readline');
+import * as fs from 'fs';
+import * as readline from 'readline';
 
 async function processLineByLine() {
 	const fileStream = fs.createReadStream('input');
@@ -8,14 +8,6 @@ async function processLineByLine() {
 		input: fileStream,
 		crlfDelay: Infinity
 	});
-
-	const prio = (l) => {
-		if (l.charCodeAt(0) > 96) {
-			return l.charCodeAt(0) - 96;
-		} else {
-			return l.charCodeAt(0) - 38;
-		}
-	};
 
 	let total = 0;
 	for await (let line of rl) {

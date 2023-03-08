@@ -1,5 +1,5 @@
-const fs = require('fs');
-const readline = require('readline');
+import * as fs from 'fs';
+import * as readline from 'readline';
 
 async function processLineByLine() {
 	const fileStream = fs.createReadStream('input');
@@ -21,12 +21,7 @@ async function processLineByLine() {
 		const id = delta[play[1]];
 
 		let im = io + id;
-
-		if (im < 0) {
-			im += 3;
-		} else if (im > 2) {
-			im -= 3;
-		}
+		im = (im % 3 + 3) % 3;
 
 		total += (values[im] + scores[play[1]]);
 	}
